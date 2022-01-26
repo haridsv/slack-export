@@ -1288,23 +1288,39 @@ def getHistory(pageableObject, channelId, pageSize = 1000):
 
     while(True):
         try:
-            response = pageableObject.history(
-                channel = channelId,
-                latest    = lastTimestamp,
-                oldest    = 0,
-                count     = pageSize
-            ).body
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                retryInSeconds = int(e.response.headers['Retry-After'])
-                print(u"Rate limit hit. Retrying in {0} second{1}.".format(retryInSeconds, "s" if retryInSeconds > 1 else ""))
-                sleep(retryInSeconds)
+             if isinstance(pageableObject, Conversations):
+                response = pageableObject.history(
+                    channel=channelId,
+                    latest=lastTimestamp,
+                    oldest=0,
+                    limit=pageSize
+                ).body
+             else:
                 response = pageableObject.history(
                     channel = channelId,
                     latest    = lastTimestamp,
                     oldest    = 0,
                     count     = pageSize
                 ).body
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                retryInSeconds = int(e.response.headers['Retry-After'])
+                print(u"Rate limit hit. Retrying in {0} second{1}.".format(retryInSeconds, "s" if retryInSeconds > 1 else ""))
+                sleep(retryInSeconds)
+                if isinstance(pageableObject, Conversations):
+                    response = pageableObject.history(
+                        channel=channelId,
+                        latest=lastTimestamp,
+                        oldest=0,
+                        limit=pageSize
+                    ).body
+                else:
+                    response = pageableObject.history(
+                        channel=channelId,
+                        latest=lastTimestamp,
+                        oldest=0,
+                        count=pageSize
+                    ).body
 
         messages.extend(response['messages'])
 
@@ -1423,7 +1439,7 @@ def fetchPublicChannels(channels):
             # that.
             channelDir = ("c-" + channel['name'])
             mkdir( channelDir )
-        messages = getHistory(slack.channels, channel['id'])
+        messages = getHistory(slack.conversations, channel['id'])
         parseMessages( channelDir, messages, 'channel')
 
 # write channels.json file
@@ -1478,7 +1494,7 @@ def fetchDirectMessages(dms):
         print(u"Fetching 1:1 DMs with {0}".format(name))
         dmId = dm['id']
         mkdir(dmId)
-        messages = getHistory(slack.im, dm['id'])
+        messages = getHistory(slack.conversations, dm['id'])
         parseMessages( dmId, messages, "im" )
 
 def promptForGroups(groups):
@@ -1502,7 +1518,7 @@ def fetchGroups(groups):
         mkdir(groupDir)
         messages = []
         print(u"Fetching history for Private Channel / Group DM: {0}".format(group['name']))
-        messages = getHistory(slack.groups, group['id'])
+        messages = getHistory(slack.conversations, group['id'])
         parseMessages( groupDir, messages, 'group' )
 
 # fetch all users for the channel and return a map userId -> userName
@@ -1533,15 +1549,19 @@ def bootstrapKeyValues():
     print(u"Found {0} Users".format(len(users)))
     sleep(1)
 
-    channels = slack.channels.list().body['channels']
+    channels = slack.conversations.list(limit = 1000, types=('public_channel')).body['channels']
     print(u"Found {0} Public Channels".format(len(channels)))
     sleep(1)
 
-    groups = slack.groups.list().body['groups']
+    groups = slack.conversations.list(limit = 1000, types=('private_channel', 'mpim')).body['channels']
     print(u"Found {0} Private Channels or Group DMs".format(len(groups)))
+    # need to retrieve channel memberships for the slack-export-viewer to work
+    for n in range(len(groups)):
+        groups[n]["members"] = slack.conversations.members(limit=1000, channel=groups[n]['id']).body['members']
+        print(u"Retrieved members of {0}".format(groups[n]['name']))
     sleep(1)
 
-    dms = slack.im.list().body['ims']
+    dms = slack.conversations.list(limit = 1000, types=('im')).body['channels']
     print(u"Found {0} 1:1 DM conversations\n".format(len(dms)))
     sleep(1)
 
