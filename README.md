@@ -15,7 +15,7 @@ Which was forked from:
 
 https://github.com/andriuspetrauskis/slack-export
 
-Original (now unmaintained) repo can be found here:
+Original (mostly unmaintained) repo can be found here:
 
 https://github.com/zach-snell/slack-export
 
