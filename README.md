@@ -1,16 +1,25 @@
 # Slack Exporter
+**Finally got it working again!**
+Implemented Slack's conversations API (since almost all previous API methods in use were...thoroughly deprecated). 
+
 
 Forked from:
 
-https://github.com/chr1spy1/slack-export
+https://github.com/trianglee/slack-export 
 
 Which is forked from:
 
+https://github.com/chr1spy1/slack-export
+
+Which was forked from:
+
 https://github.com/andriuspetrauskis/slack-export
 
-Original repo can be found here:
+Original (now unmaintained) repo can be found here:
 
 https://github.com/zach-snell/slack-export
+
+
 
 ## Description
 
