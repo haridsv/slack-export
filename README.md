@@ -1,5 +1,5 @@
 # Slack Exporter
-**Think I finally got it working again!**
+**Think I finally got it working again! (Sort of...issues with slack-export-viewer compatibility)**
 Implemented Slack's conversations API (since almost all previous API methods in use were...thoroughly deprecated). 
 
 
