@@ -1,7 +1,7 @@
 # Slack Exporter
-**Think I finally got it working again! (Sort of...issues with slack-export-viewer compatibility)**
-Implemented Slack's conversations API (since almost all previous API methods in use were...thoroughly deprecated). 
-
+**Think I finally got it working again! (Sort of...still issues with slack-export-viewer compatibility)**
+Implemented Slack's conversations API (since almost all previous API methods in use were...thoroughly deprecated).
+Added threads/replies...might slow things down. And...see notes. And...notes I haven't written in yet.  
 
 Forked from:
 
