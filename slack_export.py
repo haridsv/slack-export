@@ -11,6 +11,7 @@ from time import sleep
 from urllib.parse import urlparse
 import requests
 
+
 #################### Patched - Slacker ######################
 # Purpose of the patch is to allow for a cookie header to be set
 # so that xoxc (slack client) tokens can be used.
@@ -119,7 +120,7 @@ class BaseAPI(object):
             # handle HTTP 429 as documented at
             # https://api.slack.com/docs/rate-limits
             if response.status_code == requests.codes.too_many:
-                time.sleep(int(
+                sleep(1 + int(
                     response.headers.get('retry-after', DEFAULT_WAIT)
                 ))
                 continue
@@ -1280,6 +1281,7 @@ def getReplies(channelId, timestamp, pageSize=1000):
     conversationObject = slack.conversations
     messages = []
     lastTimestamp = None
+    lastTimestampFromPreviousIteration = lastTimestamp
 
     while True:
         try:
@@ -1294,7 +1296,7 @@ def getReplies(channelId, timestamp, pageSize=1000):
             if e.response.status_code == 429:
                 retryInSeconds = int(e.response.headers["Retry-After"])
                 print("Rate limit hit. Retrying in {0} second{1}.".format(retryInSeconds, "s" if retryInSeconds > 1 else ""))
-                sleep(retryInSeconds)
+                sleep(retryInSeconds + 1)
 
                 response = conversationObject.replies(
                     channel=channelId,
@@ -1309,8 +1311,27 @@ def getReplies(channelId, timestamp, pageSize=1000):
         if response["has_more"] == True:
             sys.stdout.write(".")
             sys.stdout.flush()
-            lastTimestamp = messages[-1]["ts"]  # -1 means last element in a list
             sleep(1.3)  # Respect the Slack API rate limit
+                
+            lastTimestamp = messages[-1]['ts']  # -1 means last element in a list
+            minTimestamp = None
+                
+            if lastTimestamp == lastTimestampFromPreviousIteration:
+                # Then we might be in an infinite loop,
+                # because lastTimestamp is supposed to be decreasing.
+                # Try harder: maybe we want messages[-2]['ts']?
+                    
+                minTimestamp = float(lastTimestamp)
+                for m in messages:
+                    if minTimestamp > float(m['ts']):
+                        minTimestamp = float(m['ts'])
+                
+                if minTimestamp == lastTimestamp:
+                    print("warning: lastTimestamp is not changing.  infinite loop?")
+                lastTimestamp = minTimestamp
+                    
+            lastTimestampFromPreviousIteration = lastTimestamp
+
         else:
             break
 
@@ -1342,6 +1363,7 @@ def getReplies(channelId, timestamp, pageSize=1000):
 def getHistory(pageableObject, channelId, pageSize = 1000):
     messages = []
     lastTimestamp = None
+    lastTimestampFromPreviousIteration = lastTimestamp
 
     while(True):
         try:
@@ -1363,7 +1385,7 @@ def getHistory(pageableObject, channelId, pageSize = 1000):
             if e.response.status_code == 429:
                 retryInSeconds = int(e.response.headers['Retry-After'])
                 print("Rate limit hit. Retrying in {0} second{1}.".format(retryInSeconds, "s" if retryInSeconds > 1 else ""))
-                sleep(retryInSeconds)
+                sleep(retryInSeconds + 1)
                 if isinstance(pageableObject, Conversations):
                     response = pageableObject.history(
                         channel=channelId,
@@ -1390,8 +1412,27 @@ def getHistory(pageableObject, channelId, pageSize = 1000):
         if (response['has_more'] == True):
             sys.stdout.write("*")
             sys.stdout.flush()
-            lastTimestamp = messages[-1]['ts'] # -1 means last element in a list
             sleep(1.3) # Respect the Slack API rate limit
+                
+            lastTimestamp = messages[-1]['ts'] # -1 means last element in a list
+            minTimestamp = None
+                
+            if lastTimestamp == lastTimestampFromPreviousIteration:
+                # Then we might be in an infinite loop,
+                # because lastTimestamp is supposed to be decreasing.
+                # Try harder: maybe we want messages[-2]['ts']?
+                    
+                minTimestamp = float(lastTimestamp)
+                for m in messages:
+                    if minTimestamp > float(m['ts']):
+                        minTimestamp = float(m['ts'])
+                
+                if minTimestamp == lastTimestamp:
+                    print("warning: lastTimestamp is not changing.  infinite loop?")
+                lastTimestamp = minTimestamp
+                    
+            lastTimestampFromPreviousIteration = lastTimestamp
+
         else:
             break
 
@@ -1606,8 +1647,25 @@ def doTestAuth():
     return testAuth
 
 # Since Slacker does not Cache.. populate some reused lists
+# TODO: 
+#   1. Only populate data for lists that will be used in export.
+#   2. Allow adjustable limits (greater or less than 1000).
+#      Fork by veqryn appears to do this for users:
+#        - users = slack.users.list().body['members']
+#        - print(u"Found {0} Users".format(len(users)))
+#        -  
+#        + users_list = slack.users.list(limit=500)
+#        + users = users_list.body['members']
+#        + while len(users_list.body['members']) >= 500:
+#        +     users_list = slack.users.list(limit=500, cursor=users_list.body['response_metadata']['next_cursor'])
+#        +     users.extend(users_list.body['members'])
+#        +     sleep(1)  # crude rate limit
+#        +        
+#        + print("Found {0} Users".format(len(users)))
+#   
 def bootstrapKeyValues():
     global users, channels, groups, dms
+     
     users = slack.users.list().body['members']
     print("Found {0} Users".format(len(users)))
     sleep(3.05)
