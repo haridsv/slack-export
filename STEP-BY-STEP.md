@@ -13,14 +13,12 @@
    Windows -
 
    ```
-   cd slack-export
    py -3 -m virtualenv venv
    ```
 
    Linux -
 
    ```
-   cd slack-export
    python3 -m virtualenv venv
    ```
    
@@ -29,13 +27,13 @@
    Windows -
 
    ```
-   venv\scripts\pip install -r requirements.txt
+   venv\scripts\pip install -r slack-export\requirements.txt
    ```
 
    Linux -
 
    ```
-   venv/bin/pip install -r requirements.txt
+   venv/bin/pip install -r slack-export/requirements.txt
    ```
 
 1. Windows only - install Windows ncurses package -
@@ -73,7 +71,7 @@
 
 ## Obtain Token and Cookies
 
-1. In Firefox, open https://arm-isg.slack.com/customize.
+1. In Firefox, open https://YOUR-SLACK-WORKSPACE.slack.com/customize.
 
 1. Sign in with SSO (if needed).
 
@@ -103,6 +101,10 @@
    ```
    SLACK_TOKEN="xoxc-..."
    ```
+   or
+   ```
+   export SLACK_TOKEN="xoxc-..."
+   ```
 
 1. "Storage" tab.
 
@@ -122,6 +124,10 @@
 
    ```
    SLACK_COOKIE="d=CD0I..."
+   ```
+   or
+   ```
+   export SLACK_COOKIE="d=CD0I..."
    ```
 
 ## Run
