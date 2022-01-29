@@ -1311,7 +1311,7 @@ def getReplies(channelId, timestamp, pageSize=1000):
         if response["has_more"] == True:
             sys.stdout.write(".")
             sys.stdout.flush()
-            sleep(1)  # Respect the Slack API rate limit
+            sleep(1.3)  # Respect the Slack API rate limit
                 
             lastTimestamp = messages[-1]['ts']  # -1 means last element in a list
             minTimestamp = None
@@ -1406,12 +1406,13 @@ def getHistory(pageableObject, channelId, pageSize = 1000):
         # Grab all replies
         for message in response["messages"]:
             if "thread_ts" in message:
+                sleep(0.5) #INSERT LIMIT 
                 messages.extend(getReplies(channelId, message["thread_ts"], pageSize))
 
         if (response['has_more'] == True):
-            sys.stdout.write(".")
+            sys.stdout.write("*")
             sys.stdout.flush()
-            sleep(1) # Respect the Slack API rate limit
+            sleep(1.3) # Respect the Slack API rate limit
                 
             lastTimestamp = messages[-1]['ts'] # -1 means last element in a list
             minTimestamp = None
@@ -1667,7 +1668,7 @@ def bootstrapKeyValues():
      
     users = slack.users.list().body['members']
     print("Found {0} Users".format(len(users)))
-    sleep(1)
+    sleep(3.05)
 
     channels = slack.conversations.list(limit = 1000, types=('public_channel')).body['channels']
     print("Found {0} Public Channels".format(len(channels)))
@@ -1675,7 +1676,7 @@ def bootstrapKeyValues():
     for n in range(len(channels)):
         channels[n]["members"] = slack.conversations.members(limit=1000, channel=channels[n]['id']).body['members']
         print("Retrieved members of {0}".format(channels[n]['name']))
-    sleep(1)
+    sleep(3.05)
 
     groups = slack.conversations.list(limit = 1000, types=('private_channel', 'mpim')).body['channels']
     print("Found {0} Private Channels or Group DMs".format(len(groups)))
@@ -1683,11 +1684,11 @@ def bootstrapKeyValues():
     for n in range(len(groups)):
         groups[n]["members"] = slack.conversations.members(limit=1000, channel=groups[n]['id']).body['members']
         print("Retrieved members of {0}".format(groups[n]['name']))
-    sleep(1)
+    sleep(3.05)
 
     dms = slack.conversations.list(limit = 1000, types=('im')).body['channels']
     print("Found {0} 1:1 DM conversations\n".format(len(dms)))
-    sleep(1)
+    sleep(3.05)
 
     getUserMap()
 
@@ -1770,7 +1771,12 @@ def downloadFiles(token, cookie_header=None):
                             headers = {"Authorization": f"Bearer {token}",
                             **cookie_header}
                             r = requests.get(url.geturl(), headers=headers)
-                            open(localFile, 'wb').write(r.content)
+                            try: 
+                                open(localFile, 'wb').write(r.content)
+                            except FileNotFoundError: 
+                                print("File writing error-still all broken")
+                                continue
+                            
 
             # Save updated data to json file
             with open(filePath, "w") as outFile:

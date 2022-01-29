@@ -1,7 +1,7 @@
 # Slack Exporter
-**Think I finally got it working again! (Sort of...still issues with slack-export-viewer compatibility)**
+**Finally got it working again! (Still issues with slack-export-viewer compatibility though.)**
 Implemented Slack's conversations API (since almost all previous API methods in use were...thoroughly deprecated).
-Added threads/replies...might slow things down. And...see notes. And...notes I haven't written in yet.  
+Added threads/replies...(does slow things down) and tweaked sleep to avoid rate limiting (kludge-y, but, should work for now). Added membership info to channels.json and fixed directory naming. 
 
 Forked from:
 
