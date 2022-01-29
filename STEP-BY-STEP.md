@@ -152,7 +152,12 @@
    Linux -
 
    ```
-   venv/bin/python slack_export.py --token $SLACK_TOKEN --cookie $SLACK_COOKIE --directMessages --downloadSlackFiles 
+   venv/bin/python slack_export.py \
+     --token $SLACK_TOKEN --cookie $SLACK_COOKIE \
+     --groups \
+     --directMessages \
+     --publicChannels \
+     --downloadSlackFiles 
    ```
 
    The messages are exported to a directory of the form `YYYYMMDD-HHMMSS-slack_export`.
