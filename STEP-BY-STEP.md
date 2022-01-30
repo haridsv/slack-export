@@ -73,7 +73,7 @@
 
 ## Obtain Token and Cookies
 
-1. In Firefox, open https://YOUR-SLACK-WORKSPACE.slack.com/customize.
+1. In a browser with developer tools active, open https://YOUR-SLACK-WORKSPACE.slack.com/customize.
 
 1. Sign in with SSO (if needed).
 
