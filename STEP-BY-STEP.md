@@ -2,10 +2,12 @@
 
 ## Install
 
+1. Create and move into a destination directory for the archive and downloaders -
+   
 1. Clone the "slack-export" repo -
 
    ```
-   git clone https://github.com/trianglee/slack-export.git
+   git clone https://github.com/nooj/slack-export.git
    ```
    
 1. Create virtualenv -
@@ -75,9 +77,9 @@
 
 1. Sign in with SSO (if needed).
 
-1. F12, for Web Developer Tools.
+1. Open Web Developer Tools.  (F12, or right click -> Inspect, etc.)
 
-1. "Console" tab.
+1. Select the "Console" tab.
 
 1. Type the command -
 
@@ -106,7 +108,7 @@
    export SLACK_TOKEN="xoxc-..."
    ```
 
-1. "Storage" tab.
+1. Select the "Storage" tab.
 
 1. Find the "d" cookie, and copy its value. Add a "d=" at the beginning, so it would
    end up being of the form `d=CD0I...`.  
